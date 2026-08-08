@@ -1,111 +1,271 @@
 <!DOCTYPE html>
-<html lang="en" dir="ltr">
+<html lang="en" dir="rtl">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Komva - Telegram Style</title>
+    <title>Komva - Messenger</title>
     <link rel="stylesheet" href="css/variables.css">
     <link rel="stylesheet" href="css/global.css">
     <link rel="stylesheet" href="css/dashboard.css">
     <link rel="stylesheet" href="css/chat.css">
+    <style>
+        /* Bottom Floating Navigation Bar */
+        .bottom-nav {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: #17212b;
+            border: 1px solid #232e3c;
+            display: flex;
+            align-items: center;
+            justify-content: space-around;
+            padding: 8px 16px;
+            border-radius: 40px;
+            width: 90%;
+            max-width: 450px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+            z-index: 1000;
+        }
+
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background: none;
+            border: none;
+            color: #879097;
+            cursor: pointer;
+            font-size: 0.75rem;
+            gap: 4px;
+            transition: 0.2s;
+        }
+
+        .nav-item.active {
+            color: #52b8ff;
+        }
+
+        .nav-item.active .nav-icon-bg {
+            background-color: #2b5278;
+            color: #fff;
+        }
+
+        .nav-icon-bg {
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.1rem;
+            position: relative;
+        }
+
+        .nav-badge {
+            position: absolute;
+            top: -2px;
+            right: -2px;
+            background-color: #2481cc;
+            color: white;
+            font-size: 0.6rem;
+            padding: 2px 5px;
+            border-radius: 10px;
+        }
+
+        /* App Views Container */
+        .app-view {
+            display: none;
+            height: calc(100vh - 90px);
+            overflow-y: auto;
+            padding-bottom: 30px;
+        }
+        .app-view.active-view {
+            display: block;
+        }
+
+        /* Profile View Styling (Matches your image) */
+        .profile-view-container {
+            max-width: 600px;
+            margin: 20px auto;
+            padding: 20px;
+            color: #fff;
+        }
+        .profile-header-card {
+            text-align: center;
+            padding: 20px 0;
+        }
+        .profile-big-avatar {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 3px solid #2481cc;
+            margin-bottom: 10px;
+        }
+        .profile-actions-row {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin: 20px 0;
+        }
+        .profile-action-btn {
+            background-color: #17212b;
+            border: 1px solid #232e3c;
+            color: #fff;
+            padding: 10px 20px;
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.9rem;
+            cursor: pointer;
+        }
+        .profile-info-box {
+            background-color: #17212b;
+            border: 1px solid #232e3c;
+            border-radius: 16px;
+            padding: 15px 20px;
+            margin-bottom: 15px;
+        }
+        .info-item {
+            margin-bottom: 15px;
+        }
+        .info-item:last-child {
+            margin-bottom: 0;
+        }
+        .info-value {
+            font-size: 1rem;
+            font-weight: 600;
+            color: #fff;
+        }
+        .info-label {
+            font-size: 0.8rem;
+            color: #879097;
+            margin-top: 2px;
+        }
+    </style>
 </head>
-<body>
-    <div class="app-container">
-        <!-- Sidebar -->
-        <aside class="sidebar">
-            <div class="sidebar-header">
-                <button class="menu-btn" id="burger-menu" title="Menu">☰</button>
-                <div class="search-box" style="flex: 1; padding: 0;">
-                    <input type="text" id="search-users" placeholder="Search">
-                </div>
-            </div>
+<body style="background-color: #0e1621; color: #fff;">
 
-            <!-- Stories Row -->
-            <div class="stories-container" id="stories-container">
-                <div class="story-item" id="add-story-btn">
-                    <div class="story-ring add-story">
-                        <span style="font-size: 1.5rem; color: var(--tg-primary);">+</span>
-                    </div>
-                    <span>My Story</span>
-                </div>
-                <!-- Mock Stories -->
-                <div class="story-item">
-                    <div class="story-ring"><img src="https://i.pravatar.cc/150?img=1"></div>
-                    <span>Ahmed</span>
-                </div>
-                <div class="story-item">
-                    <div class="story-ring"><img src="https://i.pravatar.cc/150?img=5"></div>
-                    <span>Sara</span>
-                </div>
+    <!-- 1. شاشة المحادثات (Chats View) -->
+    <div id="view-chats" class="app-view active-view">
+        <div style="padding: 20px;">
+            <h2>المحادثات</h2>
+            <div class="search-box" style="margin: 15px 0;">
+                <input type="text" id="search-users" placeholder="بحث عن محادثات أو مستخدمين..." style="width:100%; padding:12px; border-radius:15px; background:#17212b; border:1px solid #232e3c; color:#fff;">
             </div>
-
-            <!-- Conversations List -->
-            <div class="conversations-list" id="conversations-container">
-                <!-- Dynamically loaded chats -->
-            </div>
-        </aside>
-
-        <!-- Chat Area -->
-        <main class="chat-area" id="chat-area">
-            <div class="empty-state">
-                <h3>Select a chat to start messaging</h3>
-            </div>
-        </main>
-    </div>
-
-    <!-- Telegram-style Slide-out Menu Modal / Drawer -->
-    <div id="tg-menu-drawer" style="display:none; position:fixed; top:0; left:0; width:300px; height:100%; background:var(--tg-sidebar-bg); z-index:100; box-shadow:5px 0 15px rgba(0,0,0,0.3); padding:20px; border-right:1px solid var(--tg-border);">
-        <div style="display:flex; align-items:center; gap:15px; margin-bottom:30px;">
-            <img src="https://i.pravatar.cc/150?img=8" class="avatar" style="width:60px; height:60px; border-radius:50%;">
-            <div>
-                <h3 id="menu-user-name">John Doe</h3>
-                <span style="font-size:0.85rem; color:var(--tg-secondary);" id="menu-user-phone">@johndoe</span>
+            <div id="conversations-container">
+                <!-- المحادثات التجريبية -->
             </div>
         </div>
-        <ul style="list-style:none; display:flex; flex-direction:column; gap:15px;">
-            <li><a href="profile.html" style="display:flex; gap:15px; align-items:center; font-weight:500;">👤 My Profile</a></li>
-            <li><a href="settings.html" style="display:flex; gap:15px; align-items:center; font-weight:500;">⚙️ Settings</a></li>
-            <li><a href="#" id="menu-dark-toggle" style="display:flex; gap:15px; align-items:center; font-weight:500;">🌙 Toggle Theme</a></li>
-            <li><hr style="border:0; border-top:1px solid var(--tg-border); margin:10px 0;"></li>
-            <li><a href="#" id="menu-logout" style="display:flex; gap:15px; align-items:center; color:#ef4444; font-weight:500;">🚪 Log Out</a></li>
-        </ul>
-        <button id="close-menu" style="position:absolute; top:20px; right:20px; background:none; border:none; font-size:1.2rem; cursor:pointer; color:var(--tg-secondary);">✕</button>
     </div>
+
+    <!-- 2. شاشة جهات الاتصال (Contacts View) -->
+    <div id="view-contacts" class="app-view">
+        <div style="padding: 20px;">
+            <h2>جهات الاتصال</h2>
+            <p style="color: #879097; margin-top: 10px;">قريباً يتم عرض جميع المستخدمين المتاحين للمراسلة.</p>
+        </div>
+    </div>
+
+    <!-- 3. شاشة الإعدادات (Settings View) -->
+    <div id="view-settings" class="app-view">
+        <div style="padding: 20px; max-width:600px; margin:0 auto;">
+            <h2>الإعدادات</h2>
+            <div style="background:#17212b; border:1px solid #232e3c; border-radius:16px; padding:20px; margin-top:20px;">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+                    <span>الوضع الليلي التلقائي</span>
+                    <input type="checkbox" checked id="settings-theme-toggle">
+                </div>
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                    <span>الإشعارات الصوتية</span>
+                    <input type="checkbox" checked>
+                </div>
+            </div>
+            <button onclick="logout()" style="width:100%; background:#ef4444; color:white; padding:12px; border-radius:12px; border:none; margin-top:20px; font-weight:bold; cursor:pointer;">تسجيل الخروج</button>
+        </div>
+    </div>
+
+    <!-- 4. شاشة الملف الشخصي (Profile View - المطابقة لصورتك تماماً) -->
+    <div id="view-profile" class="app-view">
+        <div class="profile-view-container">
+            <div class="profile-header-card">
+                <img src="https://i.pravatar.cc/150?img=8" class="profile-big-avatar" id="user-profile-img">
+                <h2 id="profile-display-name" style="font-size: 1.4rem; font-weight: 700;">Devil's Venom</h2>
+                <span style="font-size: 0.85rem; color: #22c55e;">متصل</span>
+            </div>
+
+            <div class="profile-actions-row">
+                <button class="profile-action-btn">📷 تعيين صورة</button>
+                <button class="profile-action-btn">✏️ تعديل البيانات</button>
+                <button class="profile-action-btn" onclick="switchTab('view-settings')">⚙️ الإعدادات</button>
+            </div>
+
+            <div class="profile-info-box">
+                <div class="info-item">
+                    <div class="info-value">+20 112 0207758</div>
+                    <div class="info-label">جوال</div>
+                </div>
+                <div class="info-item" style="margin-top: 15px;">
+                    <div class="info-value" id="profile-bio-text">Devil's Warth — Be the leader, not the follower...</div>
+                    <div class="info-label">النبذة</div>
+                </div>
+                <div class="info-item" style="margin-top: 15px;">
+                    <div class="info-value" id="profile-username-text">@V_K_U1</div>
+                    <div class="info-label">اسم المستخدم</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bottom Floating Navigation Bar -->
+    <nav class="bottom-nav">
+        <button class="nav-item active" onclick="switchTab('view-chats', this)">
+            <div class="nav-icon-bg">
+                💬
+                <span class="nav-badge">138</span>
+            </div>
+            <span>المحادثات</span>
+        </button>
+        <button class="nav-item" onclick="switchTab('view-contacts', this)">
+            <div class="nav-icon-bg">👤</div>
+            <span>جهات الاتصال</span>
+        </button>
+        <button class="nav-item" onclick="switchTab('view-settings', this)">
+            <div class="nav-icon-bg">⚙️</div>
+            <span>الإعدادات</span>
+        </button>
+        <button class="nav-item" onclick="switchTab('view-profile', this)">
+            <div class="nav-icon-bg" style="padding:0;">
+                <img src="https://i.pravatar.cc/150?img=8" style="width:100%; height:100%; border-radius:50%; object-fit:cover;">
+            </div>
+            <span>الملف الشخصي</span>
+        </button>
+    </nav>
 
     <script src="js/storage.js"></script>
     <script src="js/mock-data.js"></script>
     <script src="js/chat.js"></script>
     <script>
-        // Drawer Menu Script
-        const burgerMenu = document.getElementById('burger-menu');
-        const tgMenuDrawer = document.getElementById('tg-menu-drawer');
-        const closeMenu = document.getElementById('close-menu');
-        const menuDarkToggle = document.getElementById('menu-dark-toggle');
-        const menuLogout = document.getElementById('menu-logout');
+        // Tab Navigation Logic
+        function switchTab(viewId, btnElement) {
+            document.querySelectorAll('.app-view').forEach(view => {
+                view.classList.remove('active-view');
+            });
+            document.getElementById(viewId).classList.add('active-view');
 
-        burgerMenu.addEventListener('click', () => {
-            tgMenuDrawer.style.display = 'block';
-        });
-        closeMenu.addEventListener('click', () => {
-            tgMenuDrawer.style.display = 'none';
-        });
-        menuDarkToggle.addEventListener('click', (e) => {
-            e.preventDefault();
-            const current = document.documentElement.getAttribute('data-theme');
-            const next = current === 'dark' ? 'light' : 'dark';
-            document.documentElement.setAttribute('data-theme', next);
-            Storage.setTheme(next);
-        });
-        menuLogout.addEventListener('click', (e) => {
-            e.preventDefault();
+            if (btnElement) {
+                document.querySelectorAll('.nav-item').forEach(item => {
+                    item.classList.remove('active');
+                });
+                btnElement.classList.add('active');
+            }
+        }
+
+        function logout() {
             Storage.clearSession();
             window.location.href = 'login.html';
-        });
-
-        // Add story mock interaction
-        document.getElementById('add-story-btn').addEventListener('click', () => {
-            alert("Story feature simulation: Story uploaded successfully!");
-        });
+        }
     </script>
 </body>
 </html>
