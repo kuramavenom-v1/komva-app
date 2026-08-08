@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profile - Komva</title>
+    <link rel="stylesheet" href="css/variables.css">
+    <link rel="stylesheet" href="css/global.css">
+    <link rel="stylesheet" href="css/profile.css">
+</head>
+<body>
+    <div class="page-container">
+        <header class="page-header">
+            <a href="app.html" class="btn-secondary">← Back to Chats</a>
+            <h2>Profile Settings</h2>
+        </header>
+
+        <div class="profile-card">
+            <div class="profile-avatar-section">
+                <img src="https://i.pravatar.cc/150?img=8" class="avatar-large" id="profile-avatar">
+                <button class="btn-secondary" id="change-avatar-btn">Change Photo</button>
+            </div>
+
+            <form id="profile-form">
+                <div class="form-group">
+                    <label>Display Name</label>
+                    <input type="text" id="display-name" value="John Doe">
+                </div>
+                <div class="form-group">
+                    <label>Username</label>
+                    <input type="text" id="username-input" value="@johndoe">
+                </div>
+                <div class="form-group">
+                    <label>Bio</label>
+                    <textarea id="bio-input">Building the future of web apps with Komva.</textarea>
+                </div>
+                <div class="form-group">
+                    <label>Email Address</label>
+                    <input type="email" id="email-input" value="john@komva.com" disabled>
+                </div>
+
+                <div class="form-actions">
+                    <button type="submit" class="btn-primary">Save Changes</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="js/storage.js"></script>
+    <script src="js/profile.js"></script>
+</body>
+</html>
