@@ -8,42 +8,54 @@
     <link rel="stylesheet" href="css/global.css">
     <link rel="stylesheet" href="css/settings.css">
 </head>
-<body>
-    <div class="page-container">
+<body style="background-color: var(--bg-secondary); padding: 20px;">
+    <div class="page-container" style="max-width: 600px; margin: 0 auto;">
         <header class="page-header">
-            <a href="app.html" class="btn-secondary">← Back to Chats</a>
-            <h2>Application Settings</h2>
+            <a href="app.html" class="btn-secondary" style="padding: 8px 16px; border-radius: 8px; border:1px solid var(--border-color);">← Back</a>
+            <h2>Settings</h2>
         </header>
 
-        <div class="settings-container">
-            <section class="settings-section">
-                <h3>Appearance</h3>
-                <div class="setting-item">
+        <div class="settings-container" style="display:flex; flex-direction:column; gap:20px; background:var(--bg-card); padding:20px; border-radius:12px; border:1px solid var(--border-color);">
+            <section>
+                <h3 style="color:var(--accent); margin-bottom:10px;">General</h3>
+                <div style="display:flex; justify-content:space-between; align-items:center; padding:10px 0;">
                     <span>Dark Mode</span>
-                    <input type="checkbox" id="dark-mode-toggle">
+                    <input type="checkbox" id="settings-dark-toggle" style="width:20px; height:20px; cursor:pointer;">
                 </div>
             </section>
-
-            <section class="settings-section">
-                <h3>Notifications</h3>
-                <div class="setting-item">
-                    <span>Desktop Notifications</span>
-                    <input type="checkbox" checked>
-                </div>
-                <div class="setting-item">
-                    <span>Sound Effects</span>
-                    <input type="checkbox" checked>
+            <section>
+                <h3 style="color:var(--accent); margin-bottom:10px;">Notifications</h3>
+                <div style="display:flex; justify-content:space-between; align-items:center; padding:10px 0;">
+                    <span>Enable Notifications</span>
+                    <input type="checkbox" checked style="width:20px; height:20px;">
                 </div>
             </section>
-
-            <section class="settings-section danger-zone">
-                <h3>Danger Zone</h3>
-                <button class="btn-danger" id="delete-account-btn">Delete Account</button>
+            <section>
+                <h3 style="color:var(--danger); margin-bottom:10px;">Danger Zone</h3>
+                <button id="delete-acc" style="background:var(--danger); color:white; padding:10px 20px; border-radius:8px; border:none; cursor:pointer; font-weight:600;">Delete Account</button>
             </section>
         </div>
     </div>
 
     <script src="js/storage.js"></script>
-    <script src="js/settings.js"></script>
+    <script>
+        const toggle = document.getElementById('settings-dark-toggle');
+        const theme = Storage.getTheme() || 'light';
+        document.documentElement.setAttribute('data-theme', theme);
+        toggle.checked = theme === 'dark';
+
+        toggle.addEventListener('change', (e) => {
+            const newTheme = e.target.checked ? 'dark' : 'light';
+            document.documentElement.setAttribute('data-theme', newTheme);
+            Storage.setTheme(newTheme);
+        });
+
+        document.getElementById('delete-acc').addEventListener('click', () => {
+            if(confirm("Are you sure you want to delete your account?")) {
+                Storage.clearSession();
+                window.location.href = 'signup.html';
+            }
+        });
+    </script>
 </body>
 </html>

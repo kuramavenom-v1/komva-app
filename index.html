@@ -133,5 +133,14 @@
     </main>
 
     <script src="js/app.js"></script>
+    <!-- 1. استدعاء ملف الـ JavaScript الذي يحتوي على الدوال (تأكد أن مساره صحيح حسب مجلداتك) -->
+<script src="js/auth-api.js"></script>
+
+<!-- 2. ربط الـ Form الفعلي بالدالة البرمجية -->
+<script>
+    document.getElementById('login-form').addEventListener('submit', handleLogin); // لصفحة الدخول
+    // أو
+    document.getElementById('signup-form').addEventListener('submit', handleSignup); // لصفحة التسجيل
+</script>
 </body>
 </html>
