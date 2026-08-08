@@ -1,5 +1,5 @@
 const router = require('express').Router();
-const pool = require('../db'); // تأكد إن هذا هو مسار ملف الاتصال بقاعدة البيانات اللي أنشأناه
+const User = require('../models/User');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 
@@ -8,13 +8,9 @@ router.post('/signup', async (req, res) => {
     try {
         const { name, username, phoneOrEmail, password } = req.body;
 
-        // التحقق مما إذا كان المستخدم موجود مسبقاً (بواسطة اسم المستخدم أو البريد/الجوال)
-        const userCheck = await pool.query(
-            'SELECT * FROM users WHERE username = $1 OR phone_or_email = $2',
-            [username, phoneOrEmail]
-        );
-
-        if (userCheck.rows.length > 0) {
+        // التحقق مما إذا كان المستخدم موجود مسبقاً
+        const existingUser = await User.findOne({ $or: [{ username }, { phoneOrEmail }] });
+        if (existingUser) {
             return res.status(400).json({ error: 'اسم المستخدم أو البريد/الجوال مستخدم مسبقاً' });
         }
 
@@ -22,17 +18,17 @@ router.post('/signup', async (req, res) => {
         const salt = await bcrypt.genSalt(10);
         const hashedPassword = await bcrypt.hash(password, salt);
 
-        // إدخال المستخدم الجديد في جدول PostgreSQL
-        const newUserQuery = await pool.query(
-            `INSERT INTO users (name, username, phone_or_email, password) 
-             VALUES ($1, $2, $3, $4) RETURNING id, name, username, phone_or_email, bio, avatar`,
-            [name, username, phoneOrEmail, hashedPassword]
-        );
+        // إنشاء المستخدم الجديد
+        const newUser = new User({
+            name,
+            username,
+            phoneOrEmail,
+            password: hashedPassword
+        });
 
-        const newUser = newUserQuery.rows[0];
-        res.status(201).json({ message: 'تم إنشاء الحساب بنجاح', user: newUser });
+        await newUser.save();
+        res.status(201).json({ message: 'تم إنشاء الحساب بنجاح' });
     } catch (err) {
-        console.error('Signup error:', err);
         res.status(500).json({ error: 'حدث خطأ في الخادم أثناء التسجيل' });
     }
 });
@@ -42,17 +38,14 @@ router.post('/login', async (req, res) => {
     try {
         const { phoneOrEmail, password } = req.body;
 
-        // البحث عن المستخدم بواسطة البريد/الجوال أو اسم المستخدم
-        const userQuery = await pool.query(
-            'SELECT * FROM users WHERE phone_or_email = $1 OR username = $1',
-            [phoneOrEmail]
-        );
+        // البحث عن المستخدم بواسطة الجوال أو الإيميل أو اسم المستخدم
+        const user = await User.findOne({ 
+            $or: [{ phoneOrEmail }, { username: phoneOrEmail }] 
+        });
         
-        if (userQuery.rows.length === 0) {
+        if (!user) {
             return res.status(400).json({ error: 'بيانات الدخول غير صحيحة' });
         }
-
-        const user = userQuery.rows[0];
 
         // التحقق من كلمة المرور
         const isMatch = await bcrypt.compare(password, user.password);
@@ -61,21 +54,20 @@ router.post('/login', async (req, res) => {
         }
 
         // إنشاء رمز توثيق (JWT Token)
-        const token = jwt.sign({ id: user.id }, process.env.JWT_SECRET || 'fallback_secret', { expiresIn: '7d' });
+        const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET || 'fallback_secret', { expiresIn: '7d' });
 
         res.json({
             token,
             user: {
-                id: user.id,
+                id: user._id,
                 name: user.name,
                 username: user.username,
-                phoneOrEmail: user.phone_or_email,
+                phoneOrEmail: user.phoneOrEmail,
                 bio: user.bio,
                 avatar: user.avatar
             }
         });
     } catch (err) {
-        console.error('Login error:', err);
         res.status(500).json({ error: 'حدث خطأ في الخادم أثناء تسجيل الدخول' });
     }
 });
